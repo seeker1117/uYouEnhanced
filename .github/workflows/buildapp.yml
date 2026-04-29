@@ -150,10 +150,9 @@ jobs:
           sed -i '' 's/export TARGET = .*/export TARGET = iphone:clang:'${{ inputs.sdk_version }}':14.0/' Makefile
           echo "✅ TARGET updated to: $(grep '^export TARGET' Makefile)"
           
-          # ← ここから追加：TheosにSDKを強制指定（これが大事！）
-          export THEOS_DEVICE_SDK_VERSION=${{ inputs.sdk_version }}
-          export SDKROOT=${{ github.workspace }}/theos/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk
-          echo "✅ Forced SDKROOT = $SDKROOT"
+          # デバッグ用
+          echo "✅ SDKs in theos/sdks:"
+          ls -1 ${{ github.workspace }}/theos/sdks/
           
           make package THEOS_PACKAGE_SCHEME=rootless IPA=Payload/YouTube.app FINALPACKAGE=1
           
@@ -165,6 +164,9 @@ jobs:
           UYOU_VERSION: ${{ inputs.uyou_version }}
           BUNDLE_ID: ${{ inputs.bundle_id }}
           APP_NAME: ${{ inputs.app_name }}
+          # ← ここを追加（これが一番大事！）
+          THEOS_DEVICE_SDK_VERSION: ${{ inputs.sdk_version }}
+          SDKROOT: ${{ github.workspace }}/theos/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk
 
       - name: Upload Artifact
         if: ${{ inputs.upload_artifact }}
