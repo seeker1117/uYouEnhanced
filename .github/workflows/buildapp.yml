@@ -51,6 +51,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+  env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Build uYouEnhanced
@@ -82,7 +85,7 @@ jobs:
       
       - name: SDK Caching
         id: SDK
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5
         env:
           cache-name: iOS-${{ inputs.sdk_version }}-SDK
         with:
@@ -169,7 +172,7 @@ jobs:
       - name: Create Release
         if: ${{ inputs.create_release }}
         id: create_release
-        uses: softprops/action-gh-release@v2.5.0
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UYOU_VERSION: ${{ inputs.uyou_version }}
