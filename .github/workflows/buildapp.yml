@@ -150,10 +150,20 @@ jobs:
           sed -i '' 's/export TARGET = .*/export TARGET = iphone:clang:'${{ inputs.sdk_version }}':14.0/' Makefile
           echo "✅ TARGET updated to: $(grep '^export TARGET' Makefile)"
           
-          # デバッグ用
+          # ← ここが新しく追加：17.5や古いSDKを全部26.0に強制置き換え（これで解決）
+          sed -i '' 's/17\.5/26.0/g' Makefile
+          sed -i '' 's/iPhoneOS[0-9]*\.[0-9]*/iPhoneOS26.0/g' Makefile
+          echo "✅ Forced all SDK references to 26.0"
+          echo "📋 Makefile SDK lines:"
+          grep -E 'TARGET|SDK|SYSROOT' Makefile || echo "No SDK lines found"
+          
+          # デバッグ用：SDKフォルダ確認
           echo "✅ SDKs in theos/sdks:"
           ls -1 ${{ github.workspace }}/theos/sdks/
           
+          # makeコマンドに環境変数を直接渡す（これが一番効く）
+          THEOS_DEVICE_SDK_VERSION=${{ inputs.sdk_version }} \
+          SDKROOT=${{ github.workspace }}/theos/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk \
           make package THEOS_PACKAGE_SCHEME=rootless IPA=Payload/YouTube.app FINALPACKAGE=1
           
           echo "package=$(ls -t packages | head -n1)" >>$GITHUB_OUTPUT
