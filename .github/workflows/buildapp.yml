@@ -142,15 +142,18 @@ jobs:
         run: |
           cd ${{ github.workspace }}/main
           
-          # Bundle IDを安全に変更（行番号に依存しない）
+          # Bundle ID / App名を安全に変更
           sed -i '' 's/BUNDLE_ID = .*/BUNDLE_ID = ${{ inputs.bundle_id }}/' Makefile
-          
-          # App名を安全に変更
           sed -i '' 's/DISPLAY_NAME = .*/DISPLAY_NAME = ${{ inputs.app_name }}/' Makefile
           
           # SDKバージョンを確実に適用
           sed -i '' 's/export TARGET = .*/export TARGET = iphone:clang:'${{ inputs.sdk_version }}':14.0/' Makefile
           echo "✅ TARGET updated to: $(grep '^export TARGET' Makefile)"
+          
+          # ← ここから追加：TheosにSDKを強制指定（これが大事！）
+          export THEOS_DEVICE_SDK_VERSION=${{ inputs.sdk_version }}
+          export SDKROOT=${{ github.workspace }}/theos/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk
+          echo "✅ Forced SDKROOT = $SDKROOT"
           
           make package THEOS_PACKAGE_SCHEME=rootless IPA=Payload/YouTube.app FINALPACKAGE=1
           
